@@ -33,7 +33,24 @@ const getMovieById = (request, response) => {
     });
 };
 
+const postMovie = (request, response) => {
+  const { title, director, year, color, duration } = request.body;
+
+  database
+    .query(
+      "INSERT INTO `movies` (`title`, `director`, `year`, `color`, `duration`) VALUES (?, ?, ?, ?, ?)", [title, director, year, color, duration]
+    )
+    .then((result) => {
+      response.status(201).send({ id: result.insertId });
+    })
+    .catch((error) => {
+      console.error(error);
+      response.status(500).send("Error adding movie to database");
+    });
+}
+
 module.exports = {
   getMovies,
   getMovieById,
+  postMovie,
 };
