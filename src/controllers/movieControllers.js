@@ -1,44 +1,36 @@
-const movies = [
-  {
-    id: 1,
-    title: "Citizen Kane",
-    director: "Orson Wells",
-    year: "1941",
-    color: false,
-    duration: 120,
-  },
-  {
-    id: 2,
-    title: "The Godfather",
-    director: "Francis Ford Coppola",
-    year: "1972",
-    color: true,
-    duration: 180,
-  },
-  {
-    id: 3,
-    title: "Pulp Fiction",
-    director: "Quentin Tarantino",
-    year: "1994",
-    color: true,
-    duration: 180,
-  },
-];
+const database = require("../../database");
 
-const getMovies = (req, res) => {
-  res.json(movies);
+const getMovies = (request, response) => {
+  database
+    .query("SELECT * FROM `movies`")
+    .then(([movies]) => {
+      response.json(movies);
+    })
+    .catch(
+      (error) => {
+        console.error(error);
+        response.status(500).send("Error retrieving data from database");
+      }
+    );
 };
 
-const getMovieById = (req, res) => {
-  const id = parseInt(req.params.id);
+const getMovieById = (request, response) => {
+  const { id } = request.params;
 
-  const movie = movies.find((movie) => movie.id === id);
+  database
+    .query("SELECT * FROM `movies` WHERE `id` = ?", [id])
+    .then(([movies]) => {
+      if (movies.length === 0) {
+        response.status(404).send("Movie not found");
+        return;
+      }
 
-  if (movie != null) {
-    res.json(movie);
-  } else {
-    res.status(404).send("Not Found");
-  }
+      response.json(movies[0]);
+    })
+    .catch((error) => {
+      console.error(error);
+      response.status(500).send("Error retrieving data from database");
+    });
 };
 
 module.exports = {
