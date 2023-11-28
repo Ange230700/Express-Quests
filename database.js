@@ -13,27 +13,7 @@ const database = mysql.createPool({
 database
     .getConnection()
     .then(() => {
-        console.info("Can reach database");
-    })
-    .catch((error) => {
-        console.error(error);
-    });
-
-database
-    .query("SELECT * FROM `movies`")
-    .then((result) => {
-        const [movies] = result;
-        console.info(result);
-        console.info(movies);
-    })
-    .catch((error) => {
-        console.error(error);
-    });
-
-database
-    .query("SHOW TABLES")
-    .then((result) => {
-        console.info(result);
+        console.info("Success of database connection");
     })
     .catch((error) => {
         console.error(error);

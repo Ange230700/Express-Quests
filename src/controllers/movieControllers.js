@@ -8,7 +8,6 @@ const getMovies = (request, response) => {
     })
     .catch(
       (error) => {
-        console.error(error);
         response.status(500).send("Error retrieving data from database");
       }
     );
@@ -28,7 +27,6 @@ const getMovieById = (request, response) => {
       response.json(movies[0]);
     })
     .catch((error) => {
-      console.error(error);
       response.status(500).send("Error retrieving data from database");
     });
 };
@@ -44,7 +42,6 @@ const postMovie = (request, response) => {
       response.status(201).send({ id: result.insertId });
     })
     .catch((error) => {
-      console.error(error);
       response.status(500).send("Error adding movie to database");
     });
 }
