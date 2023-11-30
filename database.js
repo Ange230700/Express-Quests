@@ -13,10 +13,10 @@ const database = mysql.createPool({
 database
     .getConnection()
     .then(() => {
-        console.info("Success of database connection");
+        console.info("Successfully connected to the database");
     })
     .catch((error) => {
-        console.error(error);
+        console.error("An error occurred while connecting to the database.");
     });
 
 module.exports = database;
