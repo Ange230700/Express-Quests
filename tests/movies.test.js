@@ -248,3 +248,39 @@ describe("PUT /api/movie/:id", () => {
     expect(response.status).toEqual(404);
   });
 });
+
+describe("DELETE /api/movies/:id", () => {
+  it("should check if the response has a status code of 204", async () => {
+    const movieToDelete = {
+      title: "The Matrix",
+      director: "Lana Wachowski",
+      year: "1999",
+      color: "1",
+      duration: 136
+    };
+    const [movie] = await database.query("INSERT INTO `movies` (`title`, `director`, `year`, `color`, `duration`) VALUES (?, ?, ?, ?, ?)", [movieToDelete.title, movieToDelete.director, movieToDelete.year, movieToDelete.color, movieToDelete.duration]);
+    const id = movie.insertId;
+    const response = await request(app).delete(`/api/movies/${id}`);
+    expect(response.status).toEqual(204);
+  });
+
+  it("should check if the movie has been deleted", async () => {
+    const movieToDelete = {
+      title: "The Matrix",
+      director: "Lana Wachowski",
+      year: "1999",
+      color: "1",
+      duration: 136
+    };
+    const [movie] = await database.query("INSERT INTO `movies` (`title`, `director`, `year`, `color`, `duration`) VALUES (?, ?, ?, ?, ?)", [movieToDelete.title, movieToDelete.director, movieToDelete.year, movieToDelete.color, movieToDelete.duration]);
+    const id = movie.insertId;
+    await request(app).delete(`/api/movies/${id}`);
+    const [deletedMovie] = await database.query("SELECT * FROM `movies` WHERE `id` = ?", [id]);
+    expect(deletedMovie.length).toBe(0);
+  });
+
+  it("should return no movie", async () => {
+    const response = await request(app).delete("/api/movies/0");
+    expect(response.status).toEqual(404);
+  });
+});

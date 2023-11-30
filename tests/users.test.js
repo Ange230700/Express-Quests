@@ -262,3 +262,39 @@ describe("PUT /api/users/:id", () => {
     expect(userFromDatabase.email).toStrictEqual(newUser.email);
   });
 });
+
+describe("DELETE /api/users/:id", () => {
+  it("should check if the response has a status code of 204", async () => {
+    const userToDelete = {
+      firstname: "John",
+      lastname: "Doe",
+      email: `${crypto.randomUUID()}@example.com`,
+      city: "New York",
+      language: "English"
+    };
+    const [user] = await database.query("INSERT INTO `users` (`firstname`, `lastname`, `email`, `city`, `language`) VALUES (?, ?, ?, ?, ?)", [userToDelete.firstname, userToDelete.lastname, userToDelete.email, userToDelete.city, userToDelete.language]);
+    const id = user.insertId;
+    const response = await request(app).delete(`/api/users/${id}`);
+    expect(response.status).toEqual(204);
+  });
+
+  it("should return a 404 status code", async () => {
+    const response = await request(app).delete("/api/users/0");
+    expect(response.status).toEqual(404);
+  });
+
+  it("should check if the user has been deleted", async () => {
+    const userToDelete = {
+      firstname: "John",
+      lastname: "Doe",
+      email: `${crypto.randomUUID()}@example.com`,
+      city: "New York",
+      language: "English"
+    };
+    const [user] = await database.query("INSERT INTO `users` (`firstname`, `lastname`, `email`, `city`, `language`) VALUES (?, ?, ?, ?, ?)", [userToDelete.firstname, userToDelete.lastname, userToDelete.email, userToDelete.city, userToDelete.language]);
+    const id = user.insertId;
+    await request(app).delete(`/api/users/${id}`);
+    const [deletedUser] = await database.query("SELECT * FROM `users` WHERE `id` = ?", [id]);
+    expect(deletedUser.length).toBe(0);
+  });
+});
