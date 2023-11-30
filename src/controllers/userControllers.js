@@ -57,8 +57,38 @@ const postUser = (request, response) => {
         });
 };
 
+const putUser = (request, response) => {
+    const { id } = request.params;
+    const { firstname, lastname, email, city, language } = request.body;
+
+    database
+        .query(
+            "UPDATE `users` SET `firstname` = ?, `lastname` = ?, `email` = ?, `city` = ?, `language` = ? WHERE `id` = ?",
+            [firstname, lastname, email, city, language, id]
+        )
+        .then(([result]) => {
+            if (result.affectedRows === 0) {
+                response.status(404).send("User not found");
+                return;
+            }
+            const updatedUser = { id, firstname, lastname, email, city, language };
+            return response.json(updatedUser);
+        })
+        .catch((error) => {
+            if (!firstname || !lastname || !email || !city || !language) {
+                return response.status(400).send("Missing required field");
+            }
+            if (error.code === "ER_DUP_ENTRY") {
+                return response.status(409).send("User already exists");
+            }
+            console.error("Error updating the user", error.message);
+            return response.status(500).send("Error updating the user");
+        });
+};
+
 module.exports = {
     getUsers,
     getUserById,
     postUser,
+    putUser,
 };
