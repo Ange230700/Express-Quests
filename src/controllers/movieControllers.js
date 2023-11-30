@@ -32,7 +32,30 @@ const getMovieById = (request, response) => {
     });
 };
 
+const postMovie = (request, response) => {
+  const { title, director, year, color, duration } = request.body;
+
+  database
+    .query(
+      "INSERT INTO `movies` (`title`, `director`, `year`, `color`, `duration`) VALUES (?, ?, ?, ?, ?)",
+      [title, director, year, color, duration]
+    )
+    .then(([result]) => {
+      const id = result.insertId;
+      const createdMovie = { id, title, director, year, color, duration };
+      return response.status(201).json(createdMovie);
+    })
+    .catch((error) => {
+      if (error.code === "ER_BAD_NULL_ERROR") {
+        return response.status(400).send("Missing required field");
+      }
+      console.error(error);
+      return response.status(500).send("Error saving the movie");
+    });
+};
+
 module.exports = {
   getMovies,
   getMovieById,
+  postMovie,
 };
