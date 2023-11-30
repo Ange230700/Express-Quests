@@ -139,3 +139,126 @@ describe("POST /api/users", () => {
     expect(response.status).toEqual(409);
   });
 });
+
+describe("PUT /api/users/:id", () => {
+  it("should check if the response has a json format", async () => {
+    const newUser = {
+      firstname: "John",
+      lastname: "Doe",
+      email: `${crypto.randomUUID()}@example.com`,
+      city: "Paris",
+      language: "French"
+    };
+    const response = await request(app).put("/api/users/1").send(newUser);
+    expect(response.headers["content-type"]).toMatch(/json/);
+  });
+
+  it("should check if the response has a status code of 200", async () => {
+    const newUser = {
+      firstname: "John",
+      lastname: "Doe",
+      email: `${crypto.randomUUID()}@example.com`,
+      city: "Paris",
+      language: "French"
+    };
+    const response = await request(app).put("/api/users/1").send(newUser);
+    expect(response.status).toEqual(200);
+  });
+
+  it("should check the existence of all required fields", async () => {
+    const newUser = {
+      firstname: "John",
+      lastname: "Doe",
+      email: `${crypto.randomUUID()}@example.com`,
+      city: "Paris",
+      language: "French"
+    };
+    const response = await request(app).put("/api/users/1").send(newUser);
+    expect(response.body).toHaveProperty("id");
+    expect(response.body).toHaveProperty("firstname");
+    expect(response.body).toHaveProperty("lastname");
+    expect(response.body).toHaveProperty("email");
+
+    const [user] = await database.query("SELECT * FROM `users` WHERE `id` = ?", [response.body.id]);
+    const [userFromDatabase] = user;
+    expect(userFromDatabase).toHaveProperty("id");
+    expect(userFromDatabase).toHaveProperty("firstname");
+    expect(userFromDatabase).toHaveProperty("lastname");
+    expect(userFromDatabase).toHaveProperty("email");
+  });
+
+  it("should check the type of all required fields", async () => {
+    const id = 1;
+    const newUser = {
+      firstname: "John",
+      lastname: "Doe",
+      email: `${crypto.randomUUID()}@example.com`,
+      city: "Paris",
+      language: "French"
+    };
+    await request(app).put(`/api/users/${id}`).send(newUser);
+
+    const [user] = await database.query("SELECT * FROM `users` WHERE `id` = ?", [id]);
+    const [userFromDatabase] = user;
+    expect(typeof userFromDatabase.id).toBe("number");
+    expect(typeof userFromDatabase.firstname).toBe("string");
+    expect(typeof userFromDatabase.lastname).toBe("string");
+    expect(typeof userFromDatabase.email).toBe("string");
+  });
+
+  it("should return a 400 status code", async () => {
+    const id = 1;
+    const newUser = {
+      lastname: "Doe",
+      email: `${crypto.randomUUID()}@example.com`,
+      city: "New York"
+    };
+    const response = await request(app).put(`/api/users/${id}`).send(newUser);
+    expect(response.status).toEqual(400);
+  });
+
+  it("should return a 409 status code", async () => {
+    const id = 6;
+    const newUser = {
+      firstname: "Jane",
+      lastname: "Doe",
+      email: "jane.doe@example.com",
+      city: "London",
+      language: "English"
+    };
+    const response = await request(app).put(`/api/users/${id}`).send(newUser);
+    expect(response.status).toEqual(409);
+  });
+
+  it("should return a 404 status code", async () => {
+    const newUser = {
+      firstname: "John",
+      lastname: "Doe",
+      email: `${crypto.randomUUID()}@example.com`,
+      city: "Paris"
+    };
+    const response = await request(app).put("/api/users/0").send(newUser);
+    expect(response.status).toEqual(404);
+  });
+
+  it("should check if the modifications have been saved", async () => {
+    const id = 1;
+    const newUser = {
+      firstname: "John",
+      lastname: "Doe",
+      email: `${crypto.randomUUID()}@example.com`,
+      city: "Paris",
+      language: "French"
+    };
+    const response = await request(app).put(`/api/users/${id}`).send(newUser);
+    expect(response.body.firstname).toStrictEqual(newUser.firstname);
+    expect(response.body.lastname).toStrictEqual(newUser.lastname);
+    expect(response.body.email).toStrictEqual(newUser.email);
+
+    const [user] = await database.query("SELECT * FROM `users` WHERE `id` = ?", [response.body.id]);
+    const [userFromDatabase] = user;
+    expect(userFromDatabase.firstname).toStrictEqual(newUser.firstname);
+    expect(userFromDatabase.lastname).toStrictEqual(newUser.lastname);
+    expect(userFromDatabase.email).toStrictEqual(newUser.email);
+  });
+});

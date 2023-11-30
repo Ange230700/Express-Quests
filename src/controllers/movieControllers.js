@@ -72,7 +72,7 @@ const putMovie = (request, response) => {
       return response.json(updatedMovie);
     })
     .catch((error) => {
-      if (error.code === "ER_BAD_NULL_ERROR") {
+      if (!title || !director || !year || !color || !duration) {
         return response.status(400).send("Missing required field");
       }
       console.error(error);
